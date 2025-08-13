@@ -437,8 +437,9 @@ export default function Home() {
         ) as Record<string, Birth>;
         setMatron(byId[latest.matronId]);
         setSire(byId[latest.sireId]);
-      } catch (e: any) {
-        if (!cancelled) setError(String(e?.message || e));
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : String(e);
+        if (!cancelled) setError(message);
       }
     })();
     return () => {
@@ -546,8 +547,9 @@ export default function Home() {
       if (!item) throw new Error("Kitty not found");
       setKitten(item);
       await loadParentsFor(item);
-    } catch (e: any) {
-      setError(String(e?.message || e));
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      setError(message);
     }
   }
 
@@ -572,8 +574,9 @@ export default function Home() {
       const pick = arr[Math.floor(Math.random() * arr.length)];
       setKitten(pick);
       await loadParentsFor(pick);
-    } catch (e: any) {
-      setError(String(e?.message || e));
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      setError(message);
     }
   }
 
