@@ -304,11 +304,99 @@ function Legend() {
   );
 }
 
+type TourStepId = "kittenMouthDominance";
+
+function useElementRect(target: HTMLElement | null): DOMRect | null {
+  const [rect, setRect] = useState<DOMRect | null>(null);
+  useEffect(() => {
+    if (!target) {
+      setRect(null);
+      return;
+    }
+    const update = () => setRect(target.getBoundingClientRect());
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(target);
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [target]);
+  return rect;
+}
+
+function SpotlightOverlay({
+  targetRect,
+  title,
+  description,
+  onNext,
+  onClose,
+  isLast = true,
+}: {
+  targetRect: DOMRect | null;
+  title: string;
+  description: string;
+  onNext: () => void;
+  onClose: () => void;
+  isLast?: boolean;
+}) {
+  if (!targetRect) return null;
+  const padding = 8;
+  const top = Math.max(0, targetRect.top - padding);
+  const left = Math.max(0, targetRect.left - padding);
+  const width = targetRect.width + padding * 2;
+  const height = targetRect.height + padding * 2;
+
+  const tooltipWidth = 320;
+  const placeRight = left + width + 16 + tooltipWidth < window.innerWidth;
+  const tooltipLeft = placeRight ? left + width + 16 : Math.max(16, left);
+  const tooltipTop = placeRight
+    ? Math.max(16, top)
+    : Math.min(window.innerHeight - 16, top + height + 12);
+
+  return (
+    <div className="fixed inset-0 z-50">
+      <div className="absolute inset-0 bg-black/60" />
+      <div
+        className="absolute rounded-md ring-2 ring-amber-400 shadow-[0_0_0_9999px_rgba(0,0,0,0.6)]"
+        style={{ top, left, width, height, pointerEvents: "none" }}
+      />
+      <div
+        className="absolute bg-background text-foreground shadow-lg rounded-md p-4 w-[320px] border"
+        style={{ left: tooltipLeft, top: tooltipTop }}
+      >
+        <div className="text-sm font-semibold mb-1">{title}</div>
+        <div className="text-xs text-muted-foreground mb-3">{description}</div>
+        <div className="flex items-center justify-between">
+          <button
+            onClick={onClose}
+            className="text-xs text-muted-foreground underline decoration-dotted"
+          >
+            Skip
+          </button>
+          <button
+            onClick={onNext}
+            className="text-xs px-3 py-1 rounded bg-foreground text-background"
+          >
+            {isLast ? "Got it" : "Next"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [kitten, setKitten] = useState<Birth | null>(null);
   const [matron, setMatron] = useState<Birth | null>(null);
   const [sire, setSire] = useState<Birth | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isTourOpen, setIsTourOpen] = useState(false);
+  const [tourStep, setTourStep] = useState<TourStepId | null>(null);
+  const [kittyIdInput, setKittyIdInput] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -393,6 +481,102 @@ export default function Home() {
     return relation === "mutation";
   });
 
+  const [targetEl, setTargetEl] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    if (!isTourOpen) {
+      setTargetEl(null);
+      return;
+    }
+    let active = true;
+    const find = () => {
+      let el: HTMLElement | null = null;
+      if (tourStep === "kittenMouthDominance") {
+        el = document.querySelector(
+          '[data-genome="kitten"][data-trait="Mouth"]'
+        ) as HTMLElement | null;
+      }
+      if (active) setTargetEl(el);
+      if (!el) requestAnimationFrame(find);
+    };
+    find();
+    return () => {
+      active = false;
+    };
+  }, [isTourOpen, tourStep]);
+
+  const targetRect = useElementRect(targetEl);
+
+  // Helpers to load a specific kitten and its parents
+  async function loadParentsFor(kittenBirth: Birth) {
+    const parentIds = [kittenBirth.matronId, kittenBirth.sireId];
+    const q2 = `
+      query Parents($ids: [numeric!]) {
+        KittyCore_Birth(where: {kittyId: {_in: $ids}}) {
+          id
+          kittyId
+          genes
+        }
+      }
+    `;
+    const data2 = await gql<BirthQuery>(q2, { ids: parentIds });
+    const byId = Object.fromEntries(
+      data2.KittyCore_Birth.map((b) => [b.kittyId, b])
+    ) as Record<string, Birth>;
+    setMatron(byId[kittenBirth.matronId] ?? null);
+    setSire(byId[kittenBirth.sireId] ?? null);
+  }
+
+  async function loadKittenById(id: string) {
+    try {
+      setError(null);
+      const q = `
+        query ByKitty($id: numeric!) {
+          KittyCore_Birth(where: {kittyId: {_eq: $id}}, limit: 1) {
+            id
+            owner
+            kittyId
+            matronId
+            sireId
+            genes
+          }
+        }
+      `;
+      const data = await gql<BirthQuery>(q, { id });
+      const item = data.KittyCore_Birth[0];
+      if (!item) throw new Error("Kitty not found");
+      setKitten(item);
+      await loadParentsFor(item);
+    } catch (e: any) {
+      setError(String(e?.message || e));
+    }
+  }
+
+  async function loadRandomRecent() {
+    try {
+      setError(null);
+      const q = `
+        query Recent {
+          KittyCore_Birth(limit: 50, order_by: {timestamp: desc}) {
+            id
+            owner
+            kittyId
+            matronId
+            sireId
+            genes
+          }
+        }
+      `;
+      const data = await gql<BirthQuery>(q);
+      const arr = data.KittyCore_Birth;
+      if (!arr.length) throw new Error("No kitties available");
+      const pick = arr[Math.floor(Math.random() * arr.length)];
+      setKitten(pick);
+      await loadParentsFor(pick);
+    } catch (e: any) {
+      setError(String(e?.message || e));
+    }
+  }
+
   return (
     <div className="min-h-screen p-6">
       <div className="mx-auto max-w-7xl space-y-8">
@@ -400,14 +584,27 @@ export default function Home() {
           <h1 className="text-3xl font-semibold tracking-tight">
             CryptoKitties Genome Mapping
           </h1>
-          <a
-            className="text-xs underline decoration-dotted text-muted-foreground"
-            href="https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/881847.svg"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Sample kitty asset
-          </a>
+          <div className="flex items-center gap-2">
+            <input
+              value={kittyIdInput}
+              onChange={(e) => setKittyIdInput(e.target.value)}
+              placeholder="Kitty ID"
+              inputMode="numeric"
+              className="text-xs px-2 py-1 rounded border bg-background w-28"
+            />
+            <button
+              onClick={() => kittyIdInput && loadKittenById(kittyIdInput)}
+              className="text-xs px-3 py-1 rounded bg-foreground text-background"
+            >
+              Load
+            </button>
+            <button
+              onClick={loadRandomRecent}
+              className="text-xs px-3 py-1 rounded border"
+            >
+              Random recent
+            </button>
+          </div>
         </header>
 
         {error && <div className="text-sm text-red-600 mb-4">{error}</div>}
@@ -542,7 +739,12 @@ export default function Home() {
                   );
                   const bg = relationBgClass(relation);
                   return (
-                    <div key={idx} className={`rounded-md p-2 ${bg}`}>
+                    <div
+                      key={idx}
+                      className={`rounded-md p-2 ${bg}`}
+                      data-genome="matron"
+                      data-trait={trait.label}
+                    >
                       <Quad quad={trait.matron} />
                     </div>
                   );
@@ -564,7 +766,12 @@ export default function Home() {
                   );
                   const bg = relationBgClass(relation);
                   return (
-                    <div key={idx} className={`rounded-md p-2 ${bg}`}>
+                    <div
+                      key={idx}
+                      className={`rounded-md p-2 ${bg}`}
+                      data-genome="sire"
+                      data-trait={trait.label}
+                    >
                       <Quad quad={trait.sire} />
                     </div>
                   );
@@ -586,7 +793,12 @@ export default function Home() {
                   );
                   const bg = relationBgClass(relation);
                   return (
-                    <div key={idx} className={`rounded-md p-2 relative ${bg}`}>
+                    <div
+                      key={idx}
+                      className={`rounded-md p-2 relative ${bg}`}
+                      data-genome="kitten"
+                      data-trait={trait.label}
+                    >
                       <Quad quad={trait.kitten} />
                       {relation === "mutation" && (
                         <span className="absolute -top-1 -right-1 inline-block h-3 w-3 rounded-full bg-rose-500" />
@@ -636,8 +848,44 @@ export default function Home() {
               ))}
             </div>
           </div>
+
+          {/* Explain button anchored at bottom-right of mapping section */}
+          <div className="mt-6 flex justify-end">
+            <button
+              onClick={() => {
+                setIsTourOpen(true);
+                setTourStep("kittenMouthDominance");
+                setTimeout(() => {
+                  const el = document.querySelector(
+                    '[data-genome="kitten"][data-trait="Mouth"]'
+                  ) as HTMLElement | null;
+                  el?.scrollIntoView({ behavior: "smooth", block: "center" });
+                }, 0);
+              }}
+              className="text-xs px-3 py-1 rounded bg-foreground text-background"
+            >
+              Explain Genome to me
+            </button>
+          </div>
         </section>
       </div>
+
+      {isTourOpen && (
+        <SpotlightOverlay
+          targetRect={targetRect}
+          title="Dominant trait (rightmost)"
+          description="Each trait is a group of four characters. The rightmost one is dominant, and it’s what you see on the kitten’s appearance. Here we highlight the Mouth trait on the kitten."
+          onNext={() => {
+            setIsTourOpen(false);
+            setTourStep(null);
+          }}
+          onClose={() => {
+            setIsTourOpen(false);
+            setTourStep(null);
+          }}
+          isLast
+        />
+      )}
     </div>
   );
 }
