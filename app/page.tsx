@@ -414,242 +414,226 @@ export default function Home() {
 
         {/* Main breeding visualization */}
         <section className="bg-gradient-to-b from-muted/20 to-muted/5 rounded-xl p-8">
-          <div className="grid grid-cols-[auto_1fr] gap-12">
-            {/* Left side: Cats stacked vertically */}
-            <div className="space-y-6">
-              {/* Matron */}
-              <div className="flex items-center gap-6">
-                <div className="bg-muted/20 rounded-lg p-4 w-64 h-64 flex flex-col items-center justify-center">
-                  <div className="text-sm font-medium mb-2">Matron</div>
-                  <div className="flex-1 flex items-center justify-center">
-                    {matron?.kittyId ? (
-                      <Image
-                        src={kittyImageUrl(matron.kittyId)!}
-                        alt={`Matron #${matron.kittyId}`}
-                        width={220}
-                        height={220}
-                        className="max-w-full max-h-full object-contain"
-                      />
-                    ) : (
-                      <div className="text-xs text-muted-foreground">
-                        Loading...
-                      </div>
-                    )}
+          <div className="grid grid-cols-[1fr_auto_1fr_auto_1fr] gap-8 items-center">
+            {/* Matron */}
+            <div className="bg-muted/20 rounded-lg p-6 w-80 h-80 flex flex-col items-center justify-center">
+              <div className="text-lg font-medium mb-3">Matron</div>
+              <div className="flex-1 flex items-center justify-center">
+                {matron?.kittyId ? (
+                  <Image
+                    src={kittyImageUrl(matron.kittyId)!}
+                    alt={`Matron #${matron.kittyId}`}
+                    width={260}
+                    height={260}
+                    className="max-w-full max-h-full object-contain"
+                  />
+                ) : (
+                  <div className="text-sm text-muted-foreground">
+                    Loading...
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    ID: {matron?.kittyId || "-"}
-                  </div>
-                </div>
+                )}
               </div>
-
-              {/* Plus */}
-              <div className="flex items-center gap-6">
-                <div className="w-64 flex justify-center">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
-                    <span className="text-lg font-light text-primary">+</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Sire */}
-              <div className="flex items-center gap-6">
-                <div className="bg-muted/20 rounded-lg p-4 w-64 h-64 flex flex-col items-center justify-center">
-                  <div className="text-sm font-medium mb-2">Sire</div>
-                  <div className="flex-1 flex items-center justify-center">
-                    {sire?.kittyId ? (
-                      <Image
-                        src={kittyImageUrl(sire.kittyId)!}
-                        alt={`Sire #${sire.kittyId}`}
-                        width={220}
-                        height={220}
-                        className="max-w-full max-h-full object-contain"
-                      />
-                    ) : (
-                      <div className="text-xs text-muted-foreground">
-                        Loading...
-                      </div>
-                    )}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    ID: {sire?.kittyId || "-"}
-                  </div>
-                </div>
-              </div>
-
-              {/* Equals */}
-              <div className="flex items-center gap-6">
-                <div className="w-64 flex justify-center">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
-                    <span className="text-lg font-light text-primary">=</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Kitten */}
-              <div className="flex items-center gap-6">
-                <div className="bg-muted/20 rounded-lg p-4 w-64 h-64 flex flex-col items-center justify-center relative">
-                  <div className="text-sm font-medium mb-2">Kitten</div>
-                  <div className="flex-1 flex items-center justify-center">
-                    {kitten?.kittyId ? (
-                      <Image
-                        src={kittyImageUrl(kitten.kittyId)!}
-                        alt={`Kitten #${kitten.kittyId}`}
-                        width={220}
-                        height={220}
-                        className="max-w-full max-h-full object-contain"
-                      />
-                    ) : (
-                      <div className="text-xs text-muted-foreground">
-                        Loading...
-                      </div>
-                    )}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    ID: {kitten?.kittyId || "-"}
-                  </div>
-                  {hasAnyMutation && (
-                    <div className="absolute top-2 right-2">
-                      <span className="inline-block h-3 w-3 rounded-full bg-rose-500" />
-                    </div>
-                  )}
-                </div>
+              <div className="text-sm text-muted-foreground mt-2">
+                ID: {matron?.kittyId || "-"}
               </div>
             </div>
 
-            {/* Right side: Compact genome visualization */}
-            <div className="flex flex-col justify-center h-full">
-              {/* Trait labels */}
-              <div className="mb-4">
-                <div className="text-sm font-medium mb-2 text-center">
-                  Genome Mapping
+            {/* Plus sign */}
+            <div className="flex items-center justify-center">
+              <div className="w-12 h-12 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center">
+                <span className="text-2xl font-light text-primary">+</span>
+              </div>
+            </div>
+
+            {/* Sire */}
+            <div className="bg-muted/20 rounded-lg p-6 w-80 h-80 flex flex-col items-center justify-center">
+              <div className="text-lg font-medium mb-3">Sire</div>
+              <div className="flex-1 flex items-center justify-center">
+                {sire?.kittyId ? (
+                  <Image
+                    src={kittyImageUrl(sire.kittyId)!}
+                    alt={`Sire #${sire.kittyId}`}
+                    width={260}
+                    height={260}
+                    className="max-w-full max-h-full object-contain"
+                  />
+                ) : (
+                  <div className="text-sm text-muted-foreground">
+                    Loading...
+                  </div>
+                )}
+              </div>
+              <div className="text-sm text-muted-foreground mt-2">
+                ID: {sire?.kittyId || "-"}
+              </div>
+            </div>
+
+            {/* Equals sign */}
+            <div className="flex items-center justify-center">
+              <div className="w-12 h-12 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center">
+                <span className="text-2xl font-light text-primary">=</span>
+              </div>
+            </div>
+
+            {/* Kitten */}
+            <div className="bg-muted/20 rounded-lg p-6 w-80 h-80 flex flex-col items-center justify-center relative">
+              <div className="text-lg font-medium mb-3">Kitten</div>
+              <div className="flex-1 flex items-center justify-center">
+                {kitten?.kittyId ? (
+                  <Image
+                    src={kittyImageUrl(kitten.kittyId)!}
+                    alt={`Kitten #${kitten.kittyId}`}
+                    width={260}
+                    height={260}
+                    className="max-w-full max-h-full object-contain"
+                  />
+                ) : (
+                  <div className="text-sm text-muted-foreground">
+                    Loading...
+                  </div>
+                )}
+              </div>
+              <div className="text-sm text-muted-foreground mt-2">
+                ID: {kitten?.kittyId || "-"}
+              </div>
+              {hasAnyMutation && (
+                <div className="absolute top-4 right-4">
+                  <span className="inline-block h-4 w-4 rounded-full bg-rose-500" />
                 </div>
-                <div className="grid grid-cols-12 gap-1 text-center mb-3">
-                  {traits.map((trait, idx) => (
-                    <div
-                      key={idx}
-                      className="text-[9px] text-muted-foreground font-medium px-1"
-                    >
-                      {trait.label}
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Expanded genome mapping section */}
+        <section className="bg-gradient-to-b from-muted/10 to-muted/5 rounded-xl p-8">
+          <div className="text-center mb-6">
+            <h2 className="text-xl font-semibold mb-2">Genome Mapping</h2>
+            <p className="text-sm text-muted-foreground">
+              Trace how genetic traits are inherited from parents to offspring
+            </p>
+          </div>
+
+          {/* Trait labels */}
+          <div className="grid grid-cols-12 gap-3 text-center mb-6">
+            {traits.map((trait, idx) => (
+              <div
+                key={idx}
+                className="text-xs text-muted-foreground font-medium px-2 py-1 bg-muted/30 rounded"
+              >
+                {trait.label}
+              </div>
+            ))}
+          </div>
+
+          {/* Expanded genome strips */}
+          <div className="bg-white/50 dark:bg-black/20 rounded-lg p-6 space-y-4">
+            {/* Matron genome */}
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-muted-foreground">
+                Matron
+              </div>
+              <div className="grid grid-cols-12 gap-3">
+                {traits.map((trait, idx) => {
+                  const relation = deriveTraitRelation(
+                    trait.matron,
+                    trait.sire,
+                    trait.kitten
+                  );
+                  const bg = relationBgClass(relation);
+                  return (
+                    <div key={idx} className={`rounded-md p-2 ${bg}`}>
+                      <Quad quad={trait.matron} />
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
+            </div>
 
-              {/* Compact genome strips */}
-              <div className="bg-white/50 dark:bg-black/20 rounded-lg p-4 space-y-3">
-                {/* Matron genome */}
-                <div className="space-y-1">
-                  <div className="text-xs font-medium text-muted-foreground">
-                    Matron
-                  </div>
-                  <div className="grid grid-cols-12 gap-1">
-                    {traits.map((trait, idx) => {
-                      const relation = deriveTraitRelation(
-                        trait.matron,
-                        trait.sire,
-                        trait.kitten
-                      );
-                      const bg = relationBgClass(relation);
-                      return (
-                        <div key={idx} className={`rounded-sm p-1 ${bg}`}>
-                          <Quad quad={trait.matron} />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Sire genome */}
-                <div className="space-y-1">
-                  <div className="text-xs font-medium text-muted-foreground">
-                    Sire
-                  </div>
-                  <div className="grid grid-cols-12 gap-1">
-                    {traits.map((trait, idx) => {
-                      const relation = deriveTraitRelation(
-                        trait.matron,
-                        trait.sire,
-                        trait.kitten
-                      );
-                      const bg = relationBgClass(relation);
-                      return (
-                        <div key={idx} className={`rounded-sm p-1 ${bg}`}>
-                          <Quad quad={trait.sire} />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Kitten genome */}
-                <div className="space-y-1">
-                  <div className="text-xs font-medium text-muted-foreground">
-                    Kitten
-                  </div>
-                  <div className="grid grid-cols-12 gap-1">
-                    {traits.map((trait, idx) => {
-                      const relation = deriveTraitRelation(
-                        trait.matron,
-                        trait.sire,
-                        trait.kitten
-                      );
-                      const bg = relationBgClass(relation);
-                      return (
-                        <div
-                          key={idx}
-                          className={`rounded-sm p-1 relative ${bg}`}
-                        >
-                          <Quad quad={trait.kitten} />
-                          {relation === "mutation" && (
-                            <span className="absolute -top-1 -right-1 inline-block h-2 w-2 rounded-full bg-rose-500" />
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+            {/* Sire genome */}
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-muted-foreground">
+                Sire
               </div>
-
-              {/* Legend below genome */}
-              <div className="mt-4">
-                <div className="text-xs text-muted-foreground mb-2 text-center">
-                  Dominant trait visible • Recessive traits inherited but hidden
-                </div>
-                <div className="flex flex-wrap justify-center gap-2">
-                  {[
-                    {
-                      label: "All share",
-                      className: "bg-emerald-100/60 dark:bg-emerald-900/30",
-                    },
-                    {
-                      label: "Parents share",
-                      className: "bg-rose-100/60 dark:bg-rose-900/30",
-                    },
-                    {
-                      label: "Matron + Kitten",
-                      className: "bg-amber-100/60 dark:bg-amber-900/30",
-                    },
-                    {
-                      label: "Sire + Kitten",
-                      className: "bg-sky-100/60 dark:bg-sky-900/30",
-                    },
-                    {
-                      label: "Mutation",
-                      className: "bg-fuchsia-100/50 dark:bg-fuchsia-900/20",
-                    },
-                  ].map((it) => (
-                    <div
-                      key={it.label}
-                      className="flex items-center gap-1 text-[10px]"
-                    >
-                      <span
-                        className={`inline-block h-2 w-3 rounded ${it.className}`}
-                      />
-                      <span className="text-muted-foreground">{it.label}</span>
+              <div className="grid grid-cols-12 gap-3">
+                {traits.map((trait, idx) => {
+                  const relation = deriveTraitRelation(
+                    trait.matron,
+                    trait.sire,
+                    trait.kitten
+                  );
+                  const bg = relationBgClass(relation);
+                  return (
+                    <div key={idx} className={`rounded-md p-2 ${bg}`}>
+                      <Quad quad={trait.sire} />
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
+            </div>
+
+            {/* Kitten genome */}
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-muted-foreground">
+                Kitten
+              </div>
+              <div className="grid grid-cols-12 gap-3">
+                {traits.map((trait, idx) => {
+                  const relation = deriveTraitRelation(
+                    trait.matron,
+                    trait.sire,
+                    trait.kitten
+                  );
+                  const bg = relationBgClass(relation);
+                  return (
+                    <div key={idx} className={`rounded-md p-2 relative ${bg}`}>
+                      <Quad quad={trait.kitten} />
+                      {relation === "mutation" && (
+                        <span className="absolute -top-1 -right-1 inline-block h-3 w-3 rounded-full bg-rose-500" />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Legend */}
+          <div className="mt-6 text-center">
+            <div className="text-sm text-muted-foreground mb-3">
+              Dominant trait visible in appearance • Recessive traits inherited
+              but hidden
+            </div>
+            <div className="flex flex-wrap justify-center gap-4">
+              {[
+                {
+                  label: "All share",
+                  className: "bg-emerald-100/60 dark:bg-emerald-900/30",
+                },
+                {
+                  label: "Parents share",
+                  className: "bg-rose-100/60 dark:bg-rose-900/30",
+                },
+                {
+                  label: "Matron + Kitten",
+                  className: "bg-amber-100/60 dark:bg-amber-900/30",
+                },
+                {
+                  label: "Sire + Kitten",
+                  className: "bg-sky-100/60 dark:bg-sky-900/30",
+                },
+                {
+                  label: "Mutation",
+                  className: "bg-fuchsia-100/50 dark:bg-fuchsia-900/20",
+                },
+              ].map((it) => (
+                <div key={it.label} className="flex items-center gap-2 text-sm">
+                  <span
+                    className={`inline-block h-3 w-4 rounded ${it.className}`}
+                  />
+                  <span className="text-muted-foreground">{it.label}</span>
+                </div>
+              ))}
             </div>
           </div>
         </section>
