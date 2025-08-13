@@ -60,42 +60,7 @@ function kittyImageUrl(id?: string) {
   return `https://img.cryptokitties.co/0x06012c8cf97bead5deae237070f9587f8e7a266d/${id}.svg`;
 }
 
-function TraitRow({
-  label,
-  matron,
-  sire,
-  kitten,
-}: {
-  label: string;
-  matron?: string;
-  sire?: string;
-  kitten?: string;
-}) {
-  const cells = [matron, sire, kitten];
-  return (
-    <div className="grid grid-cols-[140px_1fr] items-center gap-2">
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="grid grid-cols-3 gap-2">
-        {cells.map((g, i) => (
-          <div key={i} className="grid grid-cols-4 text-center text-[10px]">
-            {g?.split("").map((c, idx) => (
-              <div
-                key={idx}
-                className={
-                  idx === 3
-                    ? "bg-foreground text-background rounded px-1 py-0.5"
-                    : "bg-muted text-foreground/80 rounded px-1 py-0.5"
-                }
-              >
-                {c}
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
+//
 
 type TraitRelation =
   | "allShare"
@@ -161,148 +126,11 @@ function Quad({ quad }: { quad?: string }) {
   );
 }
 
-function GenomeStrip({
-  groups,
-  labels,
-  matronGroups,
-  sireGroups,
-  kittenGroups,
-}: {
-  groups: string[];
-  labels: string[];
-  matronGroups: string[];
-  sireGroups: string[];
-  kittenGroups: string[];
-}) {
-  return (
-    <div className="space-y-1">
-      {/* Trait labels */}
-      <div className="grid grid-cols-12 gap-1 text-center">
-        {labels.map((label, idx) => (
-          <div
-            key={idx}
-            className="text-[8px] text-muted-foreground font-medium px-1"
-          >
-            {label}
-          </div>
-        ))}
-      </div>
+//
 
-      {/* Gene strip */}
-      <div className="grid grid-cols-12 gap-1">
-        {groups.map((quad, idx) => {
-          const relation = deriveTraitRelation(
-            matronGroups[idx],
-            sireGroups[idx],
-            kittenGroups[idx]
-          );
-          const bg = relationBgClass(relation);
-          return (
-            <div key={idx} className={`rounded-sm p-1 relative ${bg}`}>
-              <Quad quad={quad} />
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
+//
 
-function CatWithGenome({
-  title,
-  birth,
-  groups,
-  labels,
-  matronGroups,
-  sireGroups,
-  kittenGroups,
-  showMutation = false,
-}: {
-  title: string;
-  birth?: Birth | null;
-  groups: string[];
-  labels: string[];
-  matronGroups: string[];
-  sireGroups: string[];
-  kittenGroups: string[];
-  showMutation?: boolean;
-}) {
-  return (
-    <div className="space-y-4">
-      {/* Cat image */}
-      <div className="bg-muted/20 rounded-lg p-4 aspect-square flex flex-col items-center justify-center">
-        <div className="text-sm font-medium mb-2">{title}</div>
-        <div className="flex-1 flex items-center justify-center">
-          {birth?.kittyId ? (
-            <Image
-              src={kittyImageUrl(birth.kittyId)!}
-              alt={`${title} #${birth.kittyId}`}
-              width={180}
-              height={180}
-              className="max-w-full max-h-full object-contain"
-            />
-          ) : (
-            <div className="text-xs text-muted-foreground">Loading...</div>
-          )}
-        </div>
-        <div className="text-xs text-muted-foreground mt-2">
-          ID: {birth?.kittyId || "-"}
-        </div>
-      </div>
-
-      {/* Genome strip */}
-      <div className="bg-background/50 rounded-lg p-3 relative">
-        <GenomeStrip
-          groups={groups}
-          labels={labels}
-          matronGroups={matronGroups}
-          sireGroups={sireGroups}
-          kittenGroups={kittenGroups}
-        />
-        {showMutation && (
-          <div className="absolute top-1 right-1">
-            <span className="inline-block h-2 w-2 rounded-full bg-rose-500" />
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function Legend() {
-  const items: Array<{ label: string; className: string }> = [
-    {
-      label: "Matron, Sire & Kitten share",
-      className: "bg-emerald-100/60 dark:bg-emerald-900/30",
-    },
-    {
-      label: "Parents share, Kitten different",
-      className: "bg-rose-100/60 dark:bg-rose-900/30",
-    },
-    {
-      label: "Matron & Kitten share",
-      className: "bg-amber-100/60 dark:bg-amber-900/30",
-    },
-    {
-      label: "Sire & Kitten share",
-      className: "bg-sky-100/60 dark:bg-sky-900/30",
-    },
-    {
-      label: "Mutation (dot on kitten)",
-      className: "bg-fuchsia-100/50 dark:bg-fuchsia-900/20",
-    },
-  ];
-  return (
-    <div className="flex flex-wrap gap-3">
-      {items.map((it) => (
-        <div key={it.label} className="flex items-center gap-2 text-xs">
-          <span className={`inline-block h-3 w-4 rounded ${it.className}`} />
-          <span className="text-muted-foreground">{it.label}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
+//
 
 type TourStepId = "kittenMouthDominance";
 
