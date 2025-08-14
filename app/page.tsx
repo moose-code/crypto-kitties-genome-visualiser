@@ -381,12 +381,24 @@ export default function Home() {
     }
   }
 
-  async function loadRandomRecent() {
+  async function loadRandomAny() {
     try {
       setError(null);
-      const q = `
-        query Recent {
-          KittyCore_Birth(limit: 50, order_by: {timestamp: desc}) {
+      const qMax = `
+        query MaxId {
+          KittyCore_Birth(limit: 1, order_by: {kittyId: desc}) {
+            kittyId
+          }
+        }
+      `;
+      type MaxIdQuery = { KittyCore_Birth: Array<{ kittyId: string }> };
+      const maxRes = await gql<MaxIdQuery>(qMax);
+      const maxId = parseInt(maxRes.KittyCore_Birth[0]?.kittyId || "0", 10);
+      if (!maxId) throw new Error("No kitties available");
+
+      const qBy = `
+        query ByKitty($id: numeric!) {
+          KittyCore_Birth(where: {kittyId: {_eq: $id}}, limit: 1) {
             id
             owner
             kittyId
@@ -396,12 +408,18 @@ export default function Home() {
           }
         }
       `;
-      const data = await gql<BirthQuery>(q);
-      const arr = data.KittyCore_Birth;
-      if (!arr.length) throw new Error("No kitties available");
-      const pick = arr[Math.floor(Math.random() * arr.length)];
-      setKitten(pick);
-      await loadParentsFor(pick);
+      let item: Birth | undefined;
+      for (let attempts = 0; attempts < 10; attempts++) {
+        const rand = Math.floor(Math.random() * maxId) + 1;
+        const res = await gql<BirthQuery>(qBy, { id: rand });
+        if (res.KittyCore_Birth[0]) {
+          item = res.KittyCore_Birth[0];
+          break;
+        }
+      }
+      if (!item) throw new Error("Random selection failed, try again");
+      setKitten(item);
+      await loadParentsFor(item);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e);
       setError(message);
@@ -430,10 +448,10 @@ export default function Home() {
               Load
             </button>
             <button
-              onClick={loadRandomRecent}
+              onClick={loadRandomAny}
               className="text-xs px-3 py-1 rounded border"
             >
-              Random recent
+              Random
             </button>
           </div>
         </header>
